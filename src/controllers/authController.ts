@@ -11,12 +11,12 @@ const refreshCookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
+// SIGNUP
 export const signup = async (req: Request, res: Response) => {
   try {
     const { username, email, password } = req.body;
-    if (!username || !email || !password) {
+    if (!username || !email || !password)
       return res.status(400).json({ error: "username, email and password required" });
-    }
 
     const existing = await User.findOne({ $or: [{ email }, { username }] });
     if (existing) return res.status(409).json({ error: "User already exists" });
@@ -43,10 +43,12 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
+// LOGIN
 export const login = async (req: Request, res: Response) => {
   try {
     const { emailOrUsername, password } = req.body;
-    if (!emailOrUsername || !password) return res.status(400).json({ error: "Credentials required" });
+    if (!emailOrUsername || !password)
+      return res.status(400).json({ error: "Credentials required" });
 
     const user = await User.findOne({
       $or: [{ email: emailOrUsername.toLowerCase() }, { username: emailOrUsername }],
@@ -64,14 +66,18 @@ export const login = async (req: Request, res: Response) => {
 
     res.cookie(COOKIE_NAME, refreshToken, refreshCookieOptions);
 
-    return res.json({ message: "Login successful", accessToken, user: { id: user._id, username: user.username, email: user.email } });
+    return res.json({
+      message: "Login successful",
+      accessToken,
+      user: { id: user._id, username: user.username, email: user.email },
+    });
   } catch (err: any) {
     console.error("login error:", err);
     return res.status(500).json({ error: "Server error" });
   }
 };
 
-//for refresh token
+// REFRESH TOKEN
 export const refreshToken = async (req: Request, res: Response) => {
   try {
     const token = req.cookies?.[COOKIE_NAME];
@@ -87,11 +93,10 @@ export const refreshToken = async (req: Request, res: Response) => {
     const user = await User.findById(payload._id);
     if (!user) return res.status(401).json({ error: "User not found" });
 
-    if (!user.refreshTokens.includes(token)) {
-      await user.save();
+    if (!user.refreshTokens.includes(token))
       return res.status(401).json({ error: "Refresh token is revoked" });
-    }
 
+    // Replace old refresh token with new
     user.refreshTokens = user.refreshTokens.filter(t => t !== token);
     const newRefresh = signRefreshToken({ _id: user._id });
     user.refreshTokens.push(newRefresh);
@@ -107,6 +112,7 @@ export const refreshToken = async (req: Request, res: Response) => {
   }
 };
 
+// LOGOUT
 export const logout = async (req: Request, res: Response) => {
   try {
     const token = req.cookies?.[COOKIE_NAME];
@@ -127,6 +133,7 @@ export const logout = async (req: Request, res: Response) => {
   }
 };
 
+// GET CURRENT USER
 export const me = async (req: Request, res: Response) => {
   if (!req.user) return res.status(401).json({ error: "Unauthorized" });
   const { _id, username, email, createdAt } = req.user;

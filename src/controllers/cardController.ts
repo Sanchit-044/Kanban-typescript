@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import Card, { ICard } from "../models/cards";
 
 export const createCard = async (req: Request, res: Response) => {
   try {
-    const { title, description, status, dueDate } = req.body;
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+    const { title, description, status, dueDate } = req.body;
 
     const card: ICard = new Card({
       title,
@@ -13,6 +15,7 @@ export const createCard = async (req: Request, res: Response) => {
       dueDate,
       owner: req.user._id,
     });
+
     await card.save();
     res.status(201).json(card);
   } catch (err: any) {
@@ -24,6 +27,7 @@ export const createCard = async (req: Request, res: Response) => {
 export const getCards = async (req: Request, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
     const cards: ICard[] = await Card.find({ owner: req.user._id });
     res.json(cards);
   } catch (err: any) {
@@ -35,12 +39,19 @@ export const getCards = async (req: Request, res: Response) => {
 export const updateCard = async (req: Request, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid card ID" });
+    }
+
     const card = await Card.findOneAndUpdate(
-      { _id: req.params.id, owner: req.user._id },
+      { _id: id, owner: req.user._id },
       req.body,
       { new: true }
     );
-    if (!card) return res.status(404).json({ error: "Card not found" });
+
+    if (!card) return res.status(404).json({ error: "Card not found or not yours" });
     res.json(card);
   } catch (err: any) {
     console.error("updateCard error:", err);
@@ -51,11 +62,15 @@ export const updateCard = async (req: Request, res: Response) => {
 export const deleteCard = async (req: Request, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-    const card = await Card.findOneAndDelete({
-      _id: req.params.id,
-      owner: req.user._id,
-    });
-    if (!card) return res.status(404).json({ error: "Card not found" });
+
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid card ID" });
+    }
+
+    const card = await Card.findOneAndDelete({ _id: id, owner: req.user._id });
+    if (!card) return res.status(404).json({ error: "Card not found or not yours" });
+
     res.json({ message: "Card deleted" });
   } catch (err: any) {
     console.error("deleteCard error:", err);

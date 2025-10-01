@@ -20,16 +20,16 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       token = req.cookies.accessToken;
     }
 
-    if (!token) return res.status(401).json({ error: "Unauthorized" });
+    if (!token) return res.status(401).json({ error: "Unauthorized: no token provided" });
 
     const payload = verifyAccessToken(token);
     const user = await User.findById(payload._id).select("-password");
-    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (!user) return res.status(401).json({ error: "Unauthorized: user not found" });
 
     req.user = user;
     next();
   } catch (err: any) {
     console.error("auth error:", err?.message ?? err);
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "Unauthorized: invalid token" });
   }
 };
