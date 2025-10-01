@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config()
 
-const MONGO_URI: string =
-  process.env.MONGO_URI ||
-  "mongodb+srv://testuser044:testuser044@kanbackend.hhehmr5.mongodb.net/kanbandb?retryWrites=true&w=majority";
+const MONGO_URI: string = process.env.MONGO_URI!;
+if (!MONGO_URI) {
+  throw new Error("MONGO_URI is not defined in environment");
+}
 
 const connectDB = async (): Promise<void> => {
   try {

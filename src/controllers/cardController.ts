@@ -11,7 +11,7 @@ export const createCard = async (req: Request, res: Response) => {
       description,
       status,
       dueDate,
-      owner: req.user._id
+      owner: req.user._id,
     });
     await card.save();
     res.status(201).json(card);
@@ -51,7 +51,10 @@ export const updateCard = async (req: Request, res: Response) => {
 export const deleteCard = async (req: Request, res: Response) => {
   try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-    const card = await Card.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
+    const card = await Card.findOneAndDelete({
+      _id: req.params.id,
+      owner: req.user._id,
+    });
     if (!card) return res.status(404).json({ error: "Card not found" });
     res.json({ message: "Card deleted" });
   } catch (err: any) {

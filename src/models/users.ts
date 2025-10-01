@@ -8,6 +8,7 @@ export interface IUser extends Document {
   password: string;
   createdAt: Date;
   updatedAt: Date;
+  refreshTokens: string[];
   generateAuthToken(): string;
   checkPassword(plainPassword: string): Promise<boolean>;
 }
@@ -23,6 +24,7 @@ const userSchema: Schema<IUser> = new Schema(
       trim: true,
     },
     password: { type: String, required: true },
+    refreshTokens: { type: [String], default: [] },
   },
   { timestamps: true }
 );
