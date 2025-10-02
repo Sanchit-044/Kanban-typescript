@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Card, { ICard } from "../models/cards";
+import { me } from "./authController";
 
 export const createCard = async (req: Request, res: Response) => {
-  try {
     if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
     const { title, description, status, dueDate } = req.body;
@@ -17,11 +17,7 @@ export const createCard = async (req: Request, res: Response) => {
     });
 
     await card.save();
-    res.status(201).json(card);
-  } catch (err: any) {
-    console.error("createCard error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
+    res.status(201).json({message: "Card created", card});
 };
 
 export const getCards = async (req: Request, res: Response) => {
