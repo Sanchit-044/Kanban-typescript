@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
 import cardRoutes from "./routes/cardRoutes";
 import cors from "cors";
+import { errorHandler } from "./middleware/errorHandler";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -23,5 +24,5 @@ app.use("/api/cards", cardRoutes);
 app.get("/", (_req: Request, res: Response) => {
   res.send("Kanban backend is good to go!");
 });
-
+app.use(errorHandler);
 export default app;
