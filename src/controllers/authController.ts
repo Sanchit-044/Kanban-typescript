@@ -7,12 +7,13 @@ import {
 } from "../utils/token";
 import { asyncHandler } from "../utils/asyncHandler";
 import { AppError } from "../utils/AppError";
+import ms from "ms";
 
 const ACCESS_COOKIE_NAME = "accessToken";
 const REFRESH_COOKIE_NAME = "refreshToken";
 
-const ACCESS_EXPIRES_MS = 15 * 60 * 1000;
-const REFRESH_EXPIRES_MS = 7 * 24 * 60 * 60 * 1000;
+const ACCESS_EXPIRES_MS = ms("15m");
+const REFRESH_EXPIRES_MS = ms("7d");
 
 const secureFlag = process.env.NODE_ENV === "production";
 
